@@ -113,12 +113,18 @@ def generate_driver(c_file_name, preprocessed_file_path, entrypoints):
     return "\n".join(driver_code)
 
 if __name__ == '__main__':
-    if len(sys.argv) != 3:
-        print(f"Usage: python3 {sys.argv[0]} <compile_commands_dir> <c_file_path>")
+    if len(sys.argv) != 2:
+        print(f"Usage: python3 {sys.argv[0]} <c_file_path>")
         sys.exit(1)
 
-    compile_commands_dir = os.path.abspath(sys.argv[1])
-    c_file_path = os.path.abspath(sys.argv[2])
+    compile_commands_dir = os.path.abspath(".") # Assume compile_commands.json is in the current directory
+    compile_commands_path = os.path.join(compile_commands_dir, "compile_commands.json")
+    if not os.path.exists(compile_commands_path):
+        print(f"Error: compile_commands.json not found at {compile_commands_path}.")
+        print("Please run the script from the directory containing compile_commands.json.")
+        sys.exit(1)
+
+    c_file_path = os.path.abspath(sys.argv[1])
 
     # 1. Extract function names
     print("--- (1/4) Extracting function names ---")
