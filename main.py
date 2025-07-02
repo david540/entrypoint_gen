@@ -56,8 +56,11 @@ def preprocess_c_file(file_path, compile_commands_dir):
     try:
         result = subprocess.run(clang_command, capture_output=True, text=True, check=True)
         return result.stdout
-    except (FileNotFoundError, subprocess.CalledProcessError) as e:
-        print(f"Error running clang: {e}", file=sys.stderr)
+    except FileNotFoundError:
+        print("Error: 'clang' command not found. Please ensure it is installed and in your PATH.", file=sys.stderr)
+        return ""
+    except subprocess.CalledProcessError as e:
+        print(f"Error running clang -E -P:\n  Command: {' '.join(e.cmd)}\n  Exit Code: {e.returncode}\n  Stdout: {e.stdout}\n  Stderr: {e.stderr}", file=sys.stderr)
         return ""
 
 # --- Function from find_entrypoints.py ---
