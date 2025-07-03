@@ -49,7 +49,7 @@ def preprocess_c_file(file_path, compile_commands_dir):
     for i, arg in enumerate(args):
         if arg.startswith('-I') or arg.startswith('-D') or arg.startswith('-U'):
             preprocessor_options.append(arg)
-        elif arg in ['-isystem'] and i + 1 < len(args):
+        elif arg in ['-isystem', '-I', '-include', '-D', '-U'] and i + 1 < len(args):
             preprocessor_options.append(arg)
             preprocessor_options.append(args[i + 1])
     clang_command = ['clang', '-E', '-P'] + preprocessor_options + [file_path]

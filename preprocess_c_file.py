@@ -48,7 +48,7 @@ def preprocess_c_file(file_path, compile_commands_dir):
         if arg.startswith('-I') or arg.startswith('-D') or arg.startswith('-U'):
             preprocessor_options.append(arg)
         # Some options like -isystem have a space, so we need to get the next argument
-        elif arg in ['-isystem'] and i + 1 < len(args):
+        elif arg in ['-isystem', '-I', '-include', '-D', '-U'] and i + 1 < len(args):
             preprocessor_options.append(arg)
             preprocessor_options.append(args[i + 1])
 
