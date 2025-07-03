@@ -48,7 +48,8 @@ def find_globals_and_externs(preprocessed_file_path, function_names):
                     
                     # Check for global variables
                     if referenced.kind == clang.cindex.CursorKind.VAR_DECL and \
-                       referenced.semantic_parent.kind == clang.cindex.CursorKind.TRANSLATION_UNIT:
+                       referenced.semantic_parent.kind == clang.cindex.CursorKind.TRANSLATION_UNIT and \
+                       not referenced.type.is_const_qualified():
                         global_vars.add(referenced.spelling)
                         
                     # Check for external functions
@@ -64,12 +65,13 @@ if __name__ == '__main__':
     preprocessed_c_code = """
 int global_var = 10;
 int another_global = 5;
+int const const_global = 15;
 
 // Declaration of an external function
 void external_func();
 
 void bar() {
-    global_var = 20;
+    global_var = const_global;
 }
 
 void foo() {
