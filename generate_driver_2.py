@@ -28,9 +28,11 @@ def generate_driver_2(preprocessed_file_path, global_vars, external_funcs):
         return ""
 
     driver_code = []
-    driver_code.append("// Forward declaration for the function to create unknown values.")
+    driver_code.append("// Forward declarations for utility functions.")
     driver_code.append("void make_unknown(void *data, unsigned long size);")
-    driver_code.append("void *alloc_safe(void *ptr, unsigned long size);\n")
+    driver_code.append("void *alloc_safe(unsigned long size);")
+    driver_code.append("void _check_initialized(void *data, unsigned long size);")
+    driver_code.append("#define check_initialized(x) _check_initialized(&(x), sizeof(x))\n")
 
 
     index = clang.cindex.Index.create()
@@ -77,15 +79,19 @@ def generate_driver_2(preprocessed_file_path, global_vars, external_funcs):
             i = 0
             for param in cursor.get_children():
                 if param.kind == clang.cindex.CursorKind.PARM_DECL:
+                    param_name = param.spelling or f"arg{i}"
+                    driver_code.append(f"    check_initialized({param_name});")
                     if param.type.kind == clang.cindex.TypeKind.POINTER:
-                        param_name = param.spelling or f"arg{i}"
-                        driver_code.append(f"    make_unknown({param_name}, sizeof(*{param_name}));")
+                        driver_code.append(f"    check_initialized(*{param_name});")
+                        pointee_type = param.type.get_pointee()
+                        if not pointee_type.is_const_qualified():
+                            driver_code.append(f"    make_unknown({param_name}, sizeof(*{param_name}));")
                     i += 1
             
             if cursor.result_type.kind != clang.cindex.TypeKind.VOID:
                 if cursor.result_type.kind == clang.cindex.TypeKind.POINTER:
                     pointee_type = cursor.result_type.get_pointee()
-                    driver_code.append(f"    {return_type} out = ({return_type})alloc_safe(0, sizeof({pointee_type.spelling}));")
+                    driver_code.append(f"    {return_type} out = ({return_type})alloc_safe(sizeof({pointee_type.spelling}));")
                     driver_code.append("    make_unknown(out, sizeof(*out));")
                 else:
                     driver_code.append(f"    {return_type} out;")
