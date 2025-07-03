@@ -72,6 +72,11 @@ def generate_driver_2(preprocessed_file_path, global_vars, external_funcs):
                     param_decls.append(f"{param_type} {param_name}")
                     param_names.append(param_name)
                     i += 1
+            if cursor.type.kind == clang.cindex.TypeKind.FUNCTIONPROTO and cursor.type.is_function_variadic():
+                if param_decls:
+                    param_decls.append("...")
+                else:
+                    param_decls.append("void, ...")
 
             driver_code.append(f"{return_type} {func_name}({', '.join(param_decls)}) {{")
             driver_code.append("    randomize_all_global_vars();")
@@ -115,13 +120,14 @@ int* external_func2(void);
 void external_func3();
 char* external_func4(char *s);
 
+int my_printf(char* fmt, int i, ...);
 """
     file_path = "preprocessed_test_driver2.c"
     with open(file_path, "w") as f:
         f.write(preprocessed_c_code)
 
     global_vars = ["global_var1", "global_var2"]
-    external_funcs = ["external_func1", "external_func2", "external_func3", "external_func4"]
+    external_funcs = ["external_func1", "external_func2", "external_func3", "external_func4", "my_printf"]
 
     print(f"--- Generating driver for {file_path} ---")
     driver_content = generate_driver_2(file_path, global_vars, external_funcs)
