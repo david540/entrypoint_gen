@@ -6,7 +6,7 @@ import os
 
 
 
-def extract_functions_from_c(file_path):
+def extract_c_functions(file_path):
     """
     Parses a C file and extracts the names of functions defined within it.
 
@@ -108,10 +108,10 @@ no_return_type() {
 """)
 
     print("--- Testing with a valid C file (valid_test.c) ---")
-    valid_functions = extract_functions_from_c("valid_test.c")
+    valid_functions = extract_c_functions("valid_test.c")
     print(f"Functions found: {valid_functions}")
     print("\n--- Testing with an invalid C file (invalid_test.c) ---")
-    invalid_functions = extract_functions_from_c("invalid_test.c")
+    invalid_functions = extract_c_functions("invalid_test.c")
     print(f"Functions found: {invalid_functions}")
 
     # Clean up the dummy files
